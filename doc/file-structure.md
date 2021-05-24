@@ -1,5 +1,5 @@
-# File Structure
-| Path                          | Purpose                           | Layer<sup>1</sup> |
+# File Structure
+| Path                          | Purpose                           | Layer<sup>1</sup> |
 |-------------------------------|-----------------------------------|-------------------|
 | `/`                           | File System Root                  | system            |
 | `/system `                    | System Components                 | system            |

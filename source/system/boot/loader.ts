@@ -8,7 +8,7 @@ class Loader {
 
 	static loaders = {};
 
-	register(name: string, path: string) {
+	register(name: string, path: string) {
 		this.scopes[name] = path;
 	}
 
@@ -37,7 +37,7 @@ class Loader {
 			for (let lib of library.imports) {
 				console.log(lib, await this.fs.exists(lib))
 
-				if (!(lib in this.scopes) || !(await this.fs.exists(lib))) {
+				if (!(lib in this.scopes) || !(await this.fs.exists(lib))) {
 					throw new Error(`Library '${name}' requires missing library '${lib}'`);
 				}
 			}
@@ -99,7 +99,7 @@ class LoaderContext {
 		return context;
 	}
 
-	static get systemContext() {
+	static get systemContext() {
 		const context = new LoaderContext();
 		context.from = "<kernel>";
 

@@ -1,12 +1,12 @@
-# File Structure
+# File Structure
 File structure used in acryps os
 
-| Path                          | Purpose                           | Layer<sup>1</sup> |
+| Path                          | Purpose                           | Layer<sup>1</sup> |
 |-------------------------------|-----------------------------------|-------------------|
 | `/`                           | File System Root                  | system            |
 | `/system`                     | System Components                 | system            |
 | `/system/boot`                | Main Kernel<sup>2</sup>           | system            |
-| `/system/boot/layers`         | Main FS Layer Keys/Endpoints      | fslbs<sup>3</sup> |
+| `/system/boot/layers`         | Main FS Layer Keys/Endpoints      | fslbs<sup>3</sup> |
 | `/system/libraries`           | System Libraries<sup>2</sup>      | system            |
 | `/system/properties`          | System Properties<sup>4</sup>     | system            |
 | `/system/applications`        | System Applications<sup>2</sup>   | system            |
