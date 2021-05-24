@@ -14,9 +14,9 @@ Example transation log:
 | 08:06   | `/a`        | write            | `1234`     |
 
 This transation log would result in
-`await fs.list("/")` → `["/a", "/b/"]`
-`await fs.read("/a")` → `"1234"`
-`await fs.read("/b/1")` → `"File B1is here"`
+`await fs.list("/")` → `["/a", "/b/"]`<br>
+`await fs.read("/a")` → `"1234"`<br>
+`await fs.read("/b/1")` → `"File B1is here"`<br>
 
 ## Layers
 This transation log can be split up into multiple layers. 
@@ -35,14 +35,14 @@ Example transation log:
 | 08:06   | `/a`        | append           | `5678`     | <span style="color: orange">layer2</span> |
 
 Output for a file system which has only loaded <span style="color: blue">layer1</span>:
-`await fs.list("/")` → `["/a"]`
-`await fs.read("/a")` → `"1234"`
-`await fs.read("/b/1")` → File does not exist
+`await fs.list("/")` → `["/a"]`<br>
+`await fs.read("/a")` → `"1234"`<br>
+`await fs.read("/b/1")` → File does not exist<br>
 
 The file system will emit a different output when <span style="color: blue">layer1</span> and <span style="color: orange">layer2</span> is loaded:
-`await fs.list("/")` → <code>["/a"<b>, "/b/"</b>]</code>
-`await fs.read("/a")` → <code>"1234<b>5678</b>"</code>
-`await fs.read("/b/1")` → `File B 1`
+`await fs.list("/")` → <code>["/a"<b>, "/b/"</b>]</code><br>
+`await fs.read("/a")` → <code>"1234<b>5678</b>"</code><br>
+`await fs.read("/b/1")` → `File B 1`<br>
 
 The file system will always try to write to write from the last loaded layer and will continue upwards if a layer has no write key or trows an exception, for example because it is full.
 
