@@ -13,7 +13,7 @@ Example transation log:
 | 08:05   | `/b/1`      | append           | `is here`  |
 | 08:06   | `/a`        | write            | `1234`     |
 
-This transation log would result in
+This transation log would result in:<br>
 `await fs.list("/")` → `["/a", "/b/"]`<br>
 `await fs.read("/a")` → `"1234"`<br>
 `await fs.read("/b/1")` → `"File B1is here"`<br>
@@ -34,12 +34,12 @@ Example transation log:
 | 08:06   | `/a`        | write            | `1234`     | <span style="color: blue">layer1</span>   |
 | 08:06   | `/a`        | append           | `5678`     | <span style="color: orange">layer2</span> |
 
-Output for a file system which has only loaded <span style="color: blue">layer1</span>:
+Output for a file system which has only loaded <span style="color: blue">layer1</span>:<br>
 `await fs.list("/")` → `["/a"]`<br>
 `await fs.read("/a")` → `"1234"`<br>
 `await fs.read("/b/1")` → File does not exist<br>
 
-The file system will emit a different output when <span style="color: blue">layer1</span> and <span style="color: orange">layer2</span> is loaded:
+The file system will emit a different output when <span style="color: blue">layer1</span> and <span style="color: orange">layer2</span> is loaded:<br>
 `await fs.list("/")` → <code>["/a"<b>, "/b/"</b>]</code><br>
 `await fs.read("/a")` → <code>"1234<b>5678</b>"</code><br>
 `await fs.read("/b/1")` → `File B 1`<br>
