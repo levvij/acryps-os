@@ -1,0 +1,27 @@
+ID=$(date | md5 | head -c 8)
+echo "[build/id] $ID"
+
+rm -r dist
+
+echo [build] kernel
+tsc --project source/system/boot/tsconfig.json
+cp source/system/boot/assets/* dist
+
+echo [build] properties
+cp -r source/system/properties dist/system/properties
+
+mkdir dist/system/properties/os/build
+echo -n $ID > dist/system/properties/os/build/id
+date +%s > dist/system/properties/os/build/time
+
+echo [build] system
+tsc --project tsconfig.json
+
+echo [build] libraries
+node build/glue.js dist/system/libraries/system System 1.0.0 /system/libraries/console.lib
+node build/glue.js dist/system/libraries/console Console 1.0.0
+
+rm dist/system/libraries/*.js
+
+echo [build] upload to AOSS
+node build/upload.js

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Booting...</title>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+		<style>
+
+			@font-face {
+				font-family: boot;
+				src: url('boot.woff') format('woff');
+			}
+
+			body {
+				background: black;
+				color: #ccc;
+				font: 16px boot, monospace;
+				white-space: pre-wrap;
+				padding: 0;
+				margin: 0;
+			}
+
+			body > svg {
+				display: block;
+				margin: 1em;
+				fill: currentColor;
+			}
+
+			ui-console ui-cursor {
+				display: block;
+				animation: 1s ui-cursor-flash linear infinite;
+			}
+
+			@keyframes ui-cursor-flash {
+				0%, 49% {
+					opacity: 1;
+				}
+
+				50%, 99% {
+					opacity: 0;
+				}
+			}
+
+		</style>
+	</head>
+
+	<body>
+		<script src="system/boot/main.kernel"></script>
+	</body>
+</html>

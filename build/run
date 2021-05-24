@@ -1,0 +1,4 @@
+./build/build
+
+cd dist
+python -m SimpleHTTPServer 1395

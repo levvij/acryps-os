@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"baseUrl": "source",
+		"target": "es6",
+		"outDir": "dist",
+		"typeRoots": [
+			"source/system/include"
+		]
+	},
+	"include": ["source/**/*"],
+	"exclude": ["source/system/boot"]
+}

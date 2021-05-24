@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"outFile": "../../../dist/system/boot/main.kernel",
+		"lib": ["ESNext", "DOM"]
+	},
+	"exclude": ["tsconfig.json"],
+	"include": [
+		"**/*",
+		"main.ts"
+	]
+}
