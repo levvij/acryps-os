@@ -8,7 +8,7 @@ class BIOS {
 			key: string,
 			endpoint: string
 		},
-		user?: {
+		fslbs?: {
 			id: string,
 			endpoint: string,
 			keys: {

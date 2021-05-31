@@ -24,4 +24,4 @@ node build/glue.js dist/system/libraries/console Console 1.0.0
 rm dist/system/libraries/*.js
 
 echo [build] upload to AOSS
-node build/upload.js
+node build/upload.js http://prerelease.aoss.os.acryps.com http://fslbs.aoss.os.acryps.com 

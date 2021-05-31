@@ -1,19 +1,19 @@
 class FileSystem {
 	console = new Console("fs");
 
-	layers = [];
+	layers: Layer[] = [];
 
-	async createLayer(name, endpoint) {
+	async createLayer(name, endpoint, mount) {
 		this.console.log("create layer");
 
-		const res = await fetch(`${endpoint}/layer`, {
+		const res = await fetch(`${FileSystem.resolveEndpoint(endpoint)}/layer`, {
 			method: "POST",
 			headers: {
 				"x-aoss-name": name
 			}
 		}).then(r => r.json());
 
-		const layer = new Layer(name, endpoint, res.id, res.keys.read, res.keys.write);
+		const layer = new Layer(name, endpoint, res.id, mount, res.keys.read, res.keys.write);
 		this.loadLayer(layer);
 
 		this.console.log("created layer");
@@ -25,20 +25,36 @@ class FileSystem {
 		this.layers.unshift(layer);
 	}
 
-	dispatch(operation, args, error, layerIndex = 0) {
+	dispatch(operation: keyof Layer, mountPath: string, args: any[], error: string) {
+		// filter layers by mounting point if a path argument is present
+		if (mountPath) {
+			return this.dispatchOnLayer(operation, args, error, this.layers.filter(layer => mountPath.startsWith(layer.mount)), 0);
+		} else {
+			return this.dispatchOnLayer(operation, args, error, this.layers, 0);
+		}
+	}
+
+	dispatchOnLayer(operation: string, args: any[], error: string, layers: Layer[], layerIndex: number) {
 		return new Promise(done => {
-			if (!this.layers[layerIndex]) {
+			if (!layers[layerIndex]) {
 				throw new FileSystemError(error);
 			}
 
-			this.layers[layerIndex][operation](
+			layers[layerIndex][operation](
 				...args,
 				res => done(res),
 				() => {
-					this.dispatch(operation, args, error, layerIndex + 1).then(res => done(res))
+					this.dispatchOnLayer(operation, args, error, layers, layerIndex + 1).then(res => done(res))
 				}
 			);
 		});
+	}
+
+	static resolveEndpoint(name) {
+		return name
+			.replace("aoss+http://", "http://")
+			.replace("aoss+https://", "https://")
+			.replace("aoss://", "https://")
 	}
 
 	write(path, content) {
@@ -46,7 +62,7 @@ class FileSystem {
 			throw new FileSystemError("File name must not end in '/'!");
 		}
 
-		return this.dispatch("write", [path, content], `Cannot write '${path}'`); 
+		return this.dispatch("write", path, [path, content], `Cannot write '${path}'`); 
 	}
 
 	append(path, content) {
@@ -54,7 +70,7 @@ class FileSystem {
 			throw new FileSystemError("File name must not end in '/'!");
 		}
 
-		return this.dispatch("append", [path, content], `Cannot append to '${path}'`); 
+		return this.dispatch("append", path, [path, content], `Cannot append to '${path}'`); 
 	}
 
 	read(path) {
@@ -62,7 +78,7 @@ class FileSystem {
 			throw new FileSystemError("File name must not end in '/'!");
 		}
 
-		return this.dispatch("read", [path], `Cannot read '${path}'`) as Promise<Blob>; 
+		return this.dispatch("read", path, [path], `Cannot read '${path}'`) as Promise<Blob>; 
 	}
 
 	createDirectory(path) {
@@ -70,34 +86,37 @@ class FileSystem {
 			throw new FileSystemError("Directory name must end in '/'!");
 		}
 
-		return this.dispatch("createDirectory", [path], `Cannot create directory '${path}'`); 
+		return this.dispatch("createDirectory", path, [path], `Cannot create directory '${path}'`); 
 	}
 
 	exists(path) {
-		return this.dispatch("exists", [path], `Cannot check '${path}' if exists`) as Promise<boolean>; 
+		return this.dispatch("exists", null, [path], `Cannot check '${path}' if exists`) as Promise<boolean>; 
 	}
 
 	list(path) {
-		return this.dispatch("list", [path], `Cannot list '${path}'`) as Promise<string[]>;
+		return this.dispatch("list", path, [path], `Cannot list '${path}'`) as Promise<string[]>;
+	}
+
+	nextHost() {
+		return this.dispatch("nextHost", null, [], `Cannot find next host`) as Promise<string>;
 	}
 }
 
 class Layer {
-	id;
+	endpoint: string;
 
-	endpoint;
-	name;
-	keys;
+	keys: {
+		read: string,
+		write?: string
+	};
 
-	constructor(name, endpoint, id, readKey, writeKey?) {
-		this.name = name;
-		this.endpoint = endpoint;
-		this.id = id;
-
+	constructor(public name: string, endpoint: string, public id: string, public mount: string, readKey, writeKey?) {
 		this.keys = {
 			read: readKey,
 			write: writeKey
 		};
+
+		this.endpoint = FileSystem.resolveEndpoint(endpoint);
 	}
 
 	async createDirectory(path, done, next) {
@@ -218,6 +237,18 @@ class Layer {
 				next(new RemoteFileSystemError(res.error));
 			} else {
 				done(res);
+			}
+		});
+	}
+
+	async nextHost(done, next) {
+		await fetch(`${this.endpoint}/next`, {
+			method: "GET"
+		}).then(res => res.json()).then(res => {
+			if (res) {
+				done(res);
+			} else {
+				next();
 			}
 		});
 	}

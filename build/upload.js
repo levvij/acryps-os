@@ -3,7 +3,8 @@ const FileSystem = require(`${__dirname}/fs.js`);
 FileSystem.fetch = require("node-fetch");
 
 const prefix = "dist/";
-const endpoint = "http://localhost:5101";
+const endpoint = process.argv[2];
+const fslbs = process.argv[3];
 
 const fs = new FileSystem();
 
@@ -26,6 +27,5 @@ fs.createLayer(`ACRYPS OS build ${new Date().toISOString()}`, endpoint).then(asy
 	local.writeFileSync("dist/system/boot/layers/root.id", layer.id);
 	local.writeFileSync("dist/system/boot/layers/root.read.key", layer.keys.read);
 	local.writeFileSync("dist/system/boot/layers/root.endpoint", endpoint);
-
-	local.writeFileSync("dist/system/boot/layers/user.endpoint", endpoint);
+	local.writeFileSync("dist/system/boot/layers/fslbs.endpoint", fslbs);
 });

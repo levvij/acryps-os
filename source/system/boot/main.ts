@@ -7,31 +7,72 @@ Console.root = document.createElement("ui-console");
 document.body.appendChild(Console.root);
 
 async function main() {
+	const console = new Console("main");
+
 	// load bios
 	const bios = new BIOS();
 	await bios.load();
 
 	const fs = new FileSystem();
-	fs.loadLayer(new Layer("system", bios.data.system.endpoint, bios.data.system.id, bios.data.system.key));
+	fs.loadLayer(new Layer("system", bios.data.system.endpoint, bios.data.system.id, "/", bios.data.system.key));
 
-	if (!bios.data.user) {
-		const layer = await fs.createLayer(
-			`User layer ${new Date().toISOString()}`, 
-			await fetch("system/boot/layers/user.endpoint").then(r => r.text())
+	if (!bios.data.fslbs) {
+		// create fslbs layer
+		// this layer contains all the keys for the user layers
+		const fslbs = await fs.createLayer(
+			`fslbs ${new Date().toISOString()}`, 
+			await fetch("system/boot/layers/fslbs.endpoint").then(r => r.text()),
+			"/system/boot/layers"
 		);
 
-		bios.data.user = {
-			id: layer.id,
-			endpoint: layer.endpoint,
+		// save fslbs layer to the bios
+		bios.data.fslbs = {
+			id: fslbs.id,
+			endpoint: fslbs.endpoint,
 			keys: {
-				read: layer.keys.read,
-				write: layer.keys.write
+				read: fslbs.keys.read,
+				write: fslbs.keys.write
 			}
 		};
 
+		console.log(`created fslbs ${fslbs.id}`);
+
+		// let fslbs choose a new aoss node for us
+		const node = await fs.nextHost();
+		console.log(`picked aoss node ${node}`);
+
+		// create new user layer in aoss node
+		const user = await fs.createLayer(`user @ ${fslbs.id}`, node, "/");
+		console.log(`created user layer ${user.id}`);
+
+		// save layer to fslbs
+		await fs.createDirectory("/system/boot/layers/");
+
+		await fs.write(`/system/boot/layers/user@${user.id}.layer`, JSON.stringify({
+			id: fslbs.id,
+			endpoint: node,
+			name: `user @ ${fslbs.id}`,
+			mount: "/",
+			keys: {
+				read: user.keys.read,
+				write: user.keys.write
+			}
+		}));
+
+		console.log(`saved user layer to fslbs`);
+
+		// save bios memory
 		await bios.save();
 	} else {
-		fs.loadLayer(new Layer("user", bios.data.user.endpoint, bios.data.user.id, bios.data.user.keys.read, bios.data.user.keys.write));
+		// load fslbs layer
+		await fs.loadLayer(new Layer("fslbs", bios.data.fslbs.endpoint, bios.data.fslbs.id, bios.data.fslbs.keys.read, bios.data.fslbs.keys.write));
+
+		// load all layers
+		for (let layer of await fs.list("/system/boot/layers/")) {
+			const configuration = JSON.parse(await fs.read(layer).then(r => r.text()));
+			
+			await fs.loadLayer(new Layer(configuration.name, configuration.endpoint, configuration.id, configuration.mount, configuration.keys.read, configuration.keys.write));
+		}
 	}
 
 	// start loader
