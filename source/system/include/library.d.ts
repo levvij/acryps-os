@@ -1,6 +1,6 @@
 declare const library: ((name: string) => any) & {
-	export(name, value: (LoaderContext) => any);
-	loadKernelModule(name);
+	export(name: string, value: (context: LoaderContext) => any);
+	callKernelInterface(name: string, ...args);
 }
 
 declare class LoaderContext {

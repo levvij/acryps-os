@@ -77,13 +77,12 @@ async function main() {
 
 	// start loader
 	const loader = new Loader(fs);
-	loader.register("system", "/system/libraries/system.lib");
 
-	loader.registerKernelModule("file-system", fs);
-	loader.registerKernelModule("console", Console);
+	// expose kernel interfaces
+	Console.expose();
+	fs.expose();
 
-	// load system
-	loader.load("system", LoaderContext.systemContext);
+	loader.start("/system/applications/desktop.app");
 }
 
 main();

@@ -100,6 +100,10 @@ class FileSystem {
 	nextHost() {
 		return this.dispatch("nextHost", null, [], `Cannot find next host`) as Promise<string>;
 	}
+
+	async expose() {
+		Loader.expose("fs.read", async (context, path) => URL.createObjectURL(await this.read(path)));
+	}
 }
 
 class Layer {
