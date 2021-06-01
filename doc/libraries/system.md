@@ -3,7 +3,7 @@ Provides system information and includes common libraries.
 
 | Path          | `/system/libraries/fs.lib`                                          |
 |:--------------|:--------------------------------------------------------------------|
-| Requires      | `console`, `fs`                                                     |
+| Requires      | `console`, `fs`, `process`                                          |
 | Exports       | await `system`                                                      |
 | Source        | [system.ts](../../source/system/libraries/system.ts)                |
 
@@ -25,9 +25,6 @@ context: LibraryContext
 ## Example
 ```
 async function main() {
-	const system = await library("system");
-	const console = library("console");
-
 	console.log(`Running ${system.os.name} version ${system.os.version}`);
 }
 ```

@@ -125,20 +125,18 @@ class Process {
 		return `
 			${Library.global}
 
-			const process = {
-				exit(error) {
-					postMessage({exit: error});
-
-					while (true) {}
-				}
-			}
-
 			async function main(library) {
 				${this.libraries.map(l => l.build()).join("\n")}
 
-				eval(${JSON.stringify(this.main)});
+				const symbols = Object.keys(Library.symbols);
 
-				typeof main !== "undefined" && await main();
+				const scopedMain = new Function(...symbols, ${JSON.stringify(`(async () => {
+					${this.main}
+
+					typeof main !== "undefined" && main();
+				})()`)});
+
+				scopedMain(...symbols.map(scope => await library(scope)));
 			}
 
 			onmessage = async event => {

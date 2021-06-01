@@ -1,6 +1,4 @@
 main = async () => {
-	const fs = library("fs");
-
 	class System {
 		os: {
 			name: string;

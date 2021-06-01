@@ -21,9 +21,6 @@ async list(path: string): string[];
 ## Example
 ```
 async function main() {
-	const fs = library("fs");
-	const console = library("console");
-
 	// write to /test file
 	await fs.write("/test", new Blob(["Hello!"]));
 

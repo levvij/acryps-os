@@ -33,9 +33,16 @@ class Library {
 		${this.libraries.map(l => l.build()).join("\n")}
 		
 		await (async library => {
-			eval(${JSON.stringify(this.main)});
+			const symbols = Object.keys(Library.symbols);
 
-			typeof main !== "undefined" && await main();
+			const scopedMain = new Function(...symbols, ${JSON.stringify(`return new Promise(async done => {
+				${this.main}
+
+				typeof main !== "undefined" && await main();
+				done();
+			})`)});
+
+			await scopedMain(...symbols.map(scope => await library(scope)));
 		})(${this.loader})`;
 	}
 

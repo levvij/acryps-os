@@ -16,15 +16,14 @@ main = async () => {
 A library can export a symbol with a library.export resolver. The `context` argument is a [a `LibraryContext` object](../../source/system/include/library.d.ts) and will be automatically created
 ```
 main = async () => {
-	class ExampleLibrary {}
+	class ExampleLibrary {
+		test() {}
+	}
 
-	library.export("example-library", context => new ExampleLibrary());
+	library.export("exampleLibrary", context => new ExampleLibrary());
 }
 ```
 
-Which can be included from the process or other libraries using
-```
-const example = library("example-library");
-```
+All exported symbols are automatically available in libraries or processes. Make sure to include the library while *glueing*!
 
 Libraries can communicate with the kernel using [kernel interfaces](kernel.md)

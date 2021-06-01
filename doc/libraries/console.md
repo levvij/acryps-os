@@ -16,8 +16,6 @@ log(message: string);
 ## Example
 ```
 async function main() {
-	const console = library("console");
-
 	console.log("hello!");
 }
 ```
