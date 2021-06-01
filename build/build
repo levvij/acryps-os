@@ -24,6 +24,7 @@ tsc --project tsconfig.json
 echo [build] libraries
 node build/glue.js dist/system/libraries/console Console 1.0.0
 node build/glue.js dist/system/libraries/fs FileSystem 1.0.0
+node build/glue.js dist/system/libraries/system System 1.0.0 /system/libraries/console /system/libraries/fs
 
 rm dist/system/libraries/*.js
 
