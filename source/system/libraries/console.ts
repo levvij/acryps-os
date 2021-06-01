@@ -7,7 +7,7 @@ main = async () => {
         log(message: string) {
             library.callKernelInterface("console.log", message);
         }
-    }
+	}
 
     library.export("console", context => new Console());
 }

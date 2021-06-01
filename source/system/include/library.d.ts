@@ -1,8 +1,16 @@
+// Loads libraries
 declare const library: ((name: string) => any) & {
-	export(name: string, value: (context: LoaderContext) => any);
+	// export symbol
+	// @doc modules/library.md
+	export(name: string, resolver: (context: LibraryContext) => any);
+
+	// calls kernel interface
+	// @doc modules/kernel.md
 	callKernelInterface(name: string, ...args);
 }
 
-declare class LoaderContext {
+// Passed to export library.export resolver
+declare class LibraryContext {
+	// Contains process name or library id
 	from: string;
 }

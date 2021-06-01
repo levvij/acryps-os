@@ -7,6 +7,10 @@ echo [build] kernel
 tsc --project source/system/boot/tsconfig.json
 cp source/system/boot/assets/* dist
 
+echo [build] kernel modules
+mkdir dist/system/boot/modules
+cp source/system/boot/modules/expose.js dist/system/boot/modules/expose.kernel
+
 echo [build] properties
 cp -r source/system/properties dist/system/properties
 

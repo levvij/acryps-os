@@ -103,6 +103,11 @@ class FileSystem {
 
 	async expose() {
 		Loader.expose("fs.read", async (context, path) => URL.createObjectURL(await this.read(path)));
+		Loader.expose("fs.write", async (context, path, data) => await this.write(path, await fetch(data).then(r => r.blob())));
+		Loader.expose("fs.append", async (context, path, data) => await this.append(path, await fetch(data).then(r => r.blob())));
+		Loader.expose("fs.create.directory", async (context, path) => await this.createDirectory(path));
+		Loader.expose("fs.exists", async (context, path) => await this.exists(path));
+		Loader.expose("fs.list", async (context, path) => await this.list(path));
 	}
 }
 

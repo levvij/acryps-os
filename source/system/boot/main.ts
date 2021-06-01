@@ -78,11 +78,51 @@ async function main() {
 	// start loader
 	const loader = new Loader(fs);
 
+	// load kernel modules from /system/boot/modules
+	for (let file of await fs.list("/system/boot/modules")) {
+		if (file.endsWith(".kernel")) {
+			console.log(`loading '${file}'`);
+
+			const kernelGlobals = {
+				loader,
+				fs,
+				bios,
+				Loader,
+				Console,
+				Process,
+				Library,
+				module: file
+			};
+
+			const id = Math.random().toString(16).substring(2);
+			const kernel = await fs.read(file).then(file => file.text());
+			const exposedKeys = Object.keys(kernelGlobals);
+
+			const script = document.createElement("script");
+			script.textContent = `window[${JSON.stringify(`${id}_main`)}] = async (${exposedKeys}) => { eval(${JSON.stringify(kernel)}) }; window[${JSON.stringify(`${id}_ready`)}]()`;
+
+			window[`${id}_ready`] = () => {
+				window[`${id}_main`](...exposedKeys.map(k => kernelGlobals[k]));
+			};
+
+			document.head.appendChild(script);
+		}
+	}
+
 	// expose kernel interfaces
 	Console.expose();
 	fs.expose();
 
 	loader.start("/system/applications/desktop.app");
+
+	// show processes
+	const preformanceLogger = new Console("perf");
+
+	setInterval(() => {
+		for (let process of Process.processes) {
+			preformanceLogger.log(`${process.forzen ? "FROZEN" : "OK"} ${process.running ? "RUNNING" : "EXITED"} ${process.name}: ${process.cpuTime.toFixed(3)}ms`);
+		}
+	}, 2000);
 }
 
 main();

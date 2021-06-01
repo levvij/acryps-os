@@ -1,4 +1,15 @@
 class Process {
+    static processes: Process[] = [];
+
+    onerror(error: Error) {
+        console.error(error);
+    }
+
+    running = false;
+    forzen = false;
+
+    cpuTime = 0;
+
 	name: string;
 	version: string;
 	libraries: Library[] = [];
@@ -6,7 +17,15 @@ class Process {
 
 	worker: Worker;
 
-	constructor(public fs: FileSystem, public path: string) {}
+    ping: {
+        time?: DOMHighResTimeStamp,
+        timeout?: number,
+        handler?: () => void
+    } = {};
+
+	constructor(public fs: FileSystem, public path: string) {
+        Process.processes.push(this);
+    }
 
 	async load() {
 		const bundle = JSON.parse(await this.fs.read(this.path).then(r => r.text()));
@@ -30,25 +49,24 @@ class Process {
 	async start() {
 		const body = await this.build();
 		const blob = new Blob([body]);
-
-		console.log("RUNNING", body);
 		
 		this.worker = new Worker(URL.createObjectURL(blob));
 		
 		this.worker.onmessage = async event => {
 			const message = event.data;
-			console.log("MESSAGE", message);
-
-			if ("exit" in message) {
-				console.log("EXIT", message.exit);
-
-				this.worker.terminate();
+			
+            if (message == "ping") { 
+                this.ping.handler();
+            } else if ("exit" in message) {
+				this.exit(message.exit);
 			} else if (message.interface) {
 				const iface = Loader.interfaces[message.interface];
-				console.log(iface, message.interface);
+				
+                if (!iface) {
+                    this.exit(new Error(`'${this.name}' tried to access undefined interface '${message.interface}'.`));
+                }
 
 				const resolved = await iface(LoaderContext.from(this), ...message.arguments);
-				console.log(resolved);
 
 				this.worker.postMessage({
 					id: message.id,
@@ -59,12 +77,49 @@ class Process {
 
 		this.worker.onerror = error => {
 			console.log("ERROR", error);
-		}
+		};
 
 		this.worker.postMessage("start");
+        this.sendPing();
 
-		console.log(this.worker);
+        this.running = true;
 	}
+
+    exit(error) {
+        this.worker.terminate();
+        this.running = false;
+
+        if (error) {
+            this.onerror(error);
+        }
+    }
+
+    async sendPing() {
+        const start = performance.now();
+
+        this.ping.time = start;
+        this.ping.handler = () => {
+            if (this.running) {
+                this.forzen = false;
+                this.cpuTime = performance.now() - start;
+
+                clearInterval(this.ping.timeout);
+
+                setTimeout(() => {
+                    if (this.running) {
+                        this.sendPing();
+                    }
+                }, 1000);
+            }
+        }
+
+        this.ping.timeout = setInterval(() => {
+            this.forzen = true;
+            this.cpuTime = performance.now() - start;
+        }, 1000);
+
+        this.worker.postMessage("ping");
+    }
 
 	async build() {
 		return `
@@ -93,7 +148,9 @@ class Process {
 					await main(name => {
 						return Library.symbols[name].value(LoaderContext.from(${JSON.stringify(this.name)}));
 					});
-				} else {
+				} else if (message == "ping") {
+                    postMessage("ping");
+                } else {
 					Library.handle(message);
 				}
 			};
