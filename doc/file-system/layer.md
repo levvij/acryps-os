@@ -69,7 +69,10 @@ The read keys for the `system` and the read/write keys for the `user` layer are 
 File System Layer Bootstrap contains all keys and endpoint files for the users loaded filesystems.
 
 ### Hosting Locations
-Default hosting locations
+![acryps cloud](http://badge.acryps.com/acryps-cloud)
+
+Default hosting locations, all encrypted with SSL.
+
 | Layer         | Host                                          |
 |---------------|-----------------------------------------------|
 | system (prod) | aoss://release.aoss.os.acryps.com             |

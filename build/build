@@ -39,4 +39,4 @@ for lib in $(ls source/system/applications); do
 done
 
 echo [build] upload to AOSS
-node build/upload.js aoss+http://prerelease.aoss.os.acryps.com aoss+http://fslbs.aoss.os.acryps.com 
+node build/upload.js aoss://prerelease.aoss.os.acryps.com aoss://fslbs.aoss.os.acryps.com 
