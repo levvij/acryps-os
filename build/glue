@@ -1,0 +1,89 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const childProcess = require("child_process");
+
+const location = process.argv[2];
+const hash = process.argv[3];
+
+const isLibrary = fs.existsSync(`${location}/library.json`);
+const isApplication = fs.existsSync(`${location}/application.json`);
+
+const outFile = `${location.replace("source/", "dist/")}.${isLibrary ? "lib" : "app"}`;
+const buildHashFile = `${location}/.build-hash`;
+
+function copy(path, dest) {
+	for (let file of fs.readdirSync(path)) {
+		if (fs.lstatSync(`${path}/${file}`).isDirectory()) {
+			fs.mkdirSync(`${dest}/${file}`);
+
+			copy(`${path}/${file}`, `${dest}/${file}`);
+		} else {
+			fs.copyFileSync(`${path}/${file}`, `${dest}${file}`);
+		}
+	}
+}
+
+if (fs.existsSync(`${location}/assets`)) {
+	fs.mkdirSync(`${outFile}_/`);
+	copy(`${location}/assets`, `${outFile}_/`);
+}
+
+if (fs.existsSync(buildHashFile)) {
+	try {
+		const bundle = JSON.parse(fs.readFileSync(buildHashFile).toString());
+
+		if (bundle[0] == hash) {
+			fs.writeFileSync(outFile, bundle[1]);
+	
+			process.exit();
+		}
+	} catch {}
+}
+
+const temporaryDistFile = `${process.cwd()}/${Math.random().toString(16).substr(2)}_dist`;
+const compile = childProcess.spawn("tsc", ["--outFile", temporaryDistFile], {
+	stdio: "inherit",
+	cwd: location
+});
+
+compile.on("exit", code => {
+	if (code) {
+		fs.unlinkSync(temporaryDistFile);
+
+		throw new Error("TypeScript compile failed!");
+	}
+
+	let bundle;
+
+	if (isLibrary) {
+		const bundleConfiguration = JSON.parse(fs.readFileSync(`${location}/library.json`).toString());
+
+		bundle = JSON.stringify([
+			1, 
+			bundleConfiguration.id, 
+			bundleConfiguration.name, 
+			bundleConfiguration.version, 
+			bundleConfiguration.libraries, 
+			fs.readFileSync(temporaryDistFile).toString()
+		]);
+
+		fs.writeFileSync(outFile, bundle);
+	} else if (isApplication) {
+		const bundleConfiguration = JSON.parse(fs.readFileSync(`${location}/application.json`).toString());
+
+		bundle = JSON.stringify([
+			bundleConfiguration.name, 
+			bundleConfiguration.version, 
+			bundleConfiguration.libraries, 
+			fs.readFileSync(temporaryDistFile).toString()
+		]);
+
+		fs.writeFileSync(outFile, bundle);
+	}
+
+	fs.writeFileSync(buildHashFile, JSON.stringify([hash, bundle]));
+	fs.unlinkSync(temporaryDistFile);
+	
+	process.exit();
+});

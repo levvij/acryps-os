@@ -66,7 +66,7 @@ class Process {
                     this.exit(new Error(`'${this.name}' tried to access undefined interface '${message.interface}'.`));
                 }
 
-				const resolved = await iface(LoaderContext.from(this), ...message.arguments);
+				const resolved = await iface(LoaderContext.from(this, this.path), ...message.arguments);
 
 				this.worker.postMessage({
 					id: message.id,
@@ -136,7 +136,11 @@ class Process {
 					typeof main !== "undefined" && main();
 				})()`)});
 
-				scopedMain(...symbols.map(scope => await library(scope)));
+				for (let i = 0; i < symbols.length; i++) {
+					symbols[i] = await library(symbols[i]);
+				}
+
+				scopedMain(...symbols);
 			}
 
 			onmessage = async event => {
@@ -144,7 +148,7 @@ class Process {
 
 				if (message == "start") {
 					await main(name => {
-						return Library.symbols[name].value(LoaderContext.from(${JSON.stringify(this.name)}));
+						return Library.symbols[name].value(LoaderContext.from(${JSON.stringify(this.name)}, ${JSON.stringify(this.path)}));
 					});
 				} else if (message == "ping") {
                     postMessage("ping");

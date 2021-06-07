@@ -1,1 +1,0 @@
-["desktop","1.0.0",["/system/libraries/console.lib","/system/libraries/fs.lib"],"// test\nasync function main() { const console = library(\"console\"); console.log(\"TEST\"); const fs = library(\"fs\"); console.log(await fs.read(\"/system/properties/os/version\").then(r => r.text())); setTimeout(() => { while (true) {} }, 10000) }"]

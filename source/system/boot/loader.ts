@@ -18,10 +18,12 @@ class Loader {
 
 class LoaderContext {
 	from: string;
+	location: string;
 
-	static from(library: Process) {
+	static from(library: Process, location: string) {
 		const context = new LoaderContext();
 		context.from = library.name;
+		context.location = location;
 
 		return context;
 	}

@@ -51,10 +51,13 @@ class FileSystem {
 	}
 
 	static resolveEndpoint(name) {
-		return name
-			.replace("aoss+http://", "http://")
-			.replace("aoss+https://", "https://")
-			.replace("aoss://", "https://")
+		const filter = /^aoss(\+https?)?\:/;
+
+		if (filter.test(name)) {
+			return name.replace(filter, name.includes("http:") ? "http:" : "https:");
+		}
+		
+		throw new Error(`Invalid aoss protocol in '${name}' (use 'aoss:', 'aoss+http:', 'aoss+https:')`);
 	}
 
 	write(path, content) {

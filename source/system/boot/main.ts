@@ -78,6 +78,8 @@ async function main() {
 	// start loader
 	const loader = new Loader(fs);
 
+	console.log([1, ...await fs.list("/system/boot/modules/"), 2].join(" - "));
+
 	// load kernel modules from /system/boot/modules
 	for (let file of await fs.list("/system/boot/modules")) {
 		if (file.endsWith(".kernel")) {
@@ -109,20 +111,15 @@ async function main() {
 		}
 	}
 
+	const dom = new DOM(document.body);
+
 	// expose kernel interfaces
 	Console.expose();
 	fs.expose();
+	dom.expose();
 
+	// start desktop
 	loader.start("/system/applications/desktop.app");
-
-	// show processes
-	const preformanceLogger = new Console("perf");
-
-	setInterval(() => {
-		for (let process of Process.processes) {
-			preformanceLogger.log(`${process.forzen ? "FROZEN" : "OK"} ${process.running ? "RUNNING" : "EXITED"} ${process.name}: ${process.cpuTime.toFixed(3)}ms`);
-		}
-	}, 2000);
 }
 
 main();

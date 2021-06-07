@@ -7,4 +7,14 @@ function renderLogo() {
 		<polygon points="37 28 37 0 65 0 65 9.33333333 46.3333333 9.33333333 46.3333333 18.6666667 65 18.6666667 65 28"></polygon>
 		<polygon transform="translate(14.000000, 14.000000) rotate(-270.000000) translate(-14.000000, -14.000000) " points="0 14.737018 0 0 28 0 28 9.33333333 10.551741 9.33333333 28 18.6666667 28 28"></polygon>
 	</svg>`;
+
+	const favicon = document.createElement("link");
+	favicon.rel = "shortcut icon";
+	favicon.type = "image/svg+xml";
+
+	favicon.href = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="28px" height="28px" viewBox="-1 -1 30 30">
+		<polygon fill="%230F05A0" stroke="white" stroke-width="2" transform="translate(14.000000, 14.000000) rotate(-270.000000) translate(-14.000000, -14.000000) " points="0 14.737018 0 0 28 0 28 9.33333333 10.551741 9.33333333 28 18.6666667 28 28"></polygon>
+	</svg>`;
+
+	document.head.appendChild(favicon);
 }

@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -e
+
 ID=$(date | md5 | head -c 8)
 echo "[build/id] $ID"
 
@@ -18,19 +22,21 @@ mkdir dist/system/properties/os/build
 echo -n $ID > dist/system/properties/os/build/id
 date +%s > dist/system/properties/os/build/time
 
-echo [build] system
-tsc --project tsconfig.json
-
 echo [build] libraries
-node build/glue.js dist/system/libraries/console Console 1.0.0
-node build/glue.js dist/system/libraries/fs FileSystem 1.0.0
-node build/glue.js dist/system/libraries/process Process 1.0.0
-node build/glue.js dist/system/libraries/system System 1.0.0 /system/libraries/console /system/libraries/fs /system/libraries/process
+mkdir dist/system/libraries
 
-rm dist/system/libraries/*.js
+for lib in $(ls source/system/libraries); do
+    echo " [build / library] $lib"
+    ./build/glue source/system/libraries/$lib $(tar --exclude=".*" -cf - source/system/libraries/$lib | md5)
+done
 
 echo [build] applications
-cp -r source/system/applications dist/system/applications
+mkdir dist/system/applications
+
+for lib in $(ls source/system/applications); do
+    echo " [build / application] $lib"
+    ./build/glue source/system/applications/$lib $(tar --exclude=".*" -cf - source/system/applications/$lib | md5)
+done
 
 echo [build] upload to AOSS
-node build/upload.js http://prerelease.aoss.os.acryps.com http://fslbs.aoss.os.acryps.com 
+node build/upload.js aoss+http://prerelease.aoss.os.acryps.com aoss+http://fslbs.aoss.os.acryps.com 

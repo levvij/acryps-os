@@ -1,8 +1,22 @@
 class FileSystem {
 	layers = [];
 
+	static resolveEndpoint(name) {
+		const url = new URL(name);
+
+		if (url.protocol == "aoss+http:") {
+			return name.replace("aoss+http:", "http:");
+		}
+		
+		if (url.protocol == "aoss:" || url.protocol == "aoss+https:") {
+			return name.replace(/^aoss(\+https)?\:/, "https:");
+		}
+			
+		throw new Error(`Invalid aoss protocol '${url.protocol}' in '${url.toString()}'`);
+	}
+
 	async createLayer(name, endpoint) {
-		const res = await FileSystem.fetch(`${endpoint}/layer`, {
+		const res = await FileSystem.fetch(`${FileSystem.resolveEndpoint(endpoint)}/layer`, {
 			method: "POST",
 			headers: {
 				"x-aoss-name": name
@@ -99,7 +113,7 @@ class Layer {
 			return next();
 		}
 
-		await FileSystem.fetch(`${this.endpoint}/directory`, {
+		await FileSystem.fetch(`${FileSystem.resolveEndpoint(this.endpoint)}/directory`, {
 			method: "POST",
 			headers: {
 				"x-aoss-path": path,
@@ -118,7 +132,7 @@ class Layer {
 
 		content = typeof process == "undefined" ? new Blob([content]) : Buffer.from(content);
 
-		await FileSystem.fetch(`${this.endpoint}/write`, {
+		await FileSystem.fetch(`${FileSystem.resolveEndpoint(this.endpoint)}/write`, {
 			method: "POST",
 			headers: {
 				"x-aoss-path": path,
@@ -138,7 +152,7 @@ class Layer {
 
 		content = typeof process == "undefined" ? new Blob([content]) : Buffer.from(content);
 
-		await FileSystem.fetch(`${this.endpoint}/append`, {
+		await FileSystem.fetch(`${FileSystem.resolveEndpoint(this.endpoint)}/append`, {
 			method: "POST",
 			headers: {
 				"x-aoss-path": path,
@@ -156,7 +170,7 @@ class Layer {
 			return next();
 		}
 
-		await FileSystem.fetch(`${this.endpoint}/read`, {
+		await FileSystem.fetch(`${FileSystem.resolveEndpoint(this.endpoint)}/read`, {
 			method: "POST",
 			headers: {
 				"x-aoss-path": path,
@@ -179,7 +193,7 @@ class Layer {
 			return next();
 		}
 
-		await FileSystem.fetch(`${this.endpoint}/exists`, {
+		await FileSystem.fetch(`${FileSystem.resolveEndpoint(this.endpoint)}/exists`, {
 			method: "POST",
 			headers: {
 				"x-aoss-path": path,
@@ -200,7 +214,7 @@ class Layer {
 			return next();
 		}
 
-		await FileSystem.fetch(`${this.endpoint}/list`, {
+		await FileSystem.fetch(`${FileSystem.resolveEndpoint(this.endpoint)}/list`, {
 			method: "POST",
 			headers: {
 				"x-aoss-path": path,

@@ -1,0 +1,10 @@
+{
+	"id": "system",
+	"name": "System",
+	"version": "1.0.0",
+	"libraries": [
+		"/system/libraries/console.lib",
+		"/system/libraries/fs.lib",
+		"/system/libraries/process.lib"
+	]
+}

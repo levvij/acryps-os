@@ -1,0 +1,39 @@
+:root {
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+}
+
+body > ui-console,
+body > svg {
+    display: none;
+}
+
+ui-desktop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+
+    background-size: cover;
+}
+
+ui-global-bar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    color: black;
+}
+
+ui-global-bar-item {
+    padding: 0.25em 0.75em;
+}
+
+ui-global-bar-item:last-child {
+    flex-grow: 1;
+    text-align: right;
+}

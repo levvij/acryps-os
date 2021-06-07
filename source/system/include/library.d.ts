@@ -13,4 +13,7 @@ declare const library: ((name: string) => any) & {
 declare class LibraryContext {
 	// Contains process name or library id
 	from: string;
+
+	// .app/.lib location
+	location: string;
 }

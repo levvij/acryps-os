@@ -1,0 +1,8 @@
+{
+    "name": "desktop",
+    "version": "1.0.0",
+    "libraries": [
+        "/system/libraries/system.lib",
+        "/system/libraries/dom.lib"
+    ]
+}

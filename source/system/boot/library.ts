@@ -35,14 +35,18 @@ class Library {
 		await (async library => {
 			const symbols = Object.keys(Library.symbols);
 
-			const scopedMain = new Function(...symbols, ${JSON.stringify(`return new Promise(async done => {
+			const scopedMain = new Function("library", ...symbols, ${JSON.stringify(`return new Promise(async done => {
 				${this.main}
 
 				typeof main !== "undefined" && await main();
 				done();
 			})`)});
 
-			await scopedMain(...symbols.map(scope => await library(scope)));
+			for (let i = 0; i < symbols.length; i++) {
+				symbols[i] = await library(symbols[i]);
+			}
+
+			await scopedMain(library, ...symbols);
 		})(${this.loader})`;
 	}
 
@@ -83,9 +87,10 @@ class Library {
 		return `
 		
 		class LoaderContext {
-			static from(name) {
+			static from(name, location) {
 				return {
-					from: name
+					from: name,
+					location
 				};
 			}
 		}

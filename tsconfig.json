@@ -8,5 +8,5 @@
 		]
 	},
 	"include": ["source/**/*"],
-	"exclude": ["source/system/boot"]
+	"exclude": ["source/system/boot", "source/system/libraries"]
 }
